@@ -32,13 +32,15 @@ int main()
 
   // Create a Kalman Filter instance
   FusionEKF fusionEKF;
-
+  
+  
   // used to compute the RMSE later
   Tools tools;
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
+  vector<MeasurementPackage> measurements;
 
-  h.onMessage([&fusionEKF,&tools,&estimations,&ground_truth](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&fusionEKF,&tools,&estimations,&ground_truth, &measurements](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -105,11 +107,27 @@ int main()
     	  gt_values(3) = vy_gt;
     	  ground_truth.push_back(gt_values);
           
-          //Call ProcessMeasurment(meas_package) for Kalman filter
-    	  fusionEKF.ProcessMeasurement(meas_package);    	  
+        //Call ProcessMeasurment(meas_package) for Kalman filter
+    	  fusionEKF.ProcessMeasurement(meas_package);   
+
+        // backward/forward smoothing
+        for (vector<MeasurementPackage>::reverse_iterator m = measurements.rbegin(); m != measurements.rend(); ++m ) { 
+          fusionEKF.ProcessMeasurement(*m);
+        }
+
+        int offset = 1;
+        if (measurements.size() > 200) {
+          measurements.erase(measurements.begin());
+          offset = 0;
+        }
+
+        measurements.push_back(meas_package); 	  
+        for (vector<MeasurementPackage>::iterator m = measurements.begin() + offset; m != measurements.end(); ++m ) { 
+          fusionEKF.ProcessMeasurement(*m);   
+        }
+
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
-
     	  VectorXd estimate(4);
 
     	  double p_x = fusionEKF.ekf_.x_(0);
@@ -134,7 +152,7 @@ int main()
           msgJson["rmse_vx"] = RMSE(2);
           msgJson["rmse_vy"] = RMSE(3);
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
         }

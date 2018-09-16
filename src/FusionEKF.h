@@ -30,13 +30,13 @@ public:
   * Kalman Filter update and prediction math lives in here.
   */
   KalmanFilter ekf_;
-
+  long long previous_timestamp_;
 private:
   // check whether the tracking toolbox was initialized or not (first measurement)
   bool is_initialized_;
 
   // previous timestamp
-  long long previous_timestamp_;
+  
 
   // tool object used to compute Jacobian and RMSE
   Tools tools;
