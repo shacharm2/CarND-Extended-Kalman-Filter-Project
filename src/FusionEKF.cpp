@@ -77,11 +77,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
     ekf_.Q_ = MatrixXd(4, 4);
-    
+    previous_timestamp_ = measurement_pack.timestamp_;
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
+      cout << "First measurement is RADAR, set location & velocity " << endl;     
       float range = measurement_pack.raw_measurements_[0];
       float heading = measurement_pack.raw_measurements_[1];
       float velocity = measurement_pack.raw_measurements_[2];
@@ -90,31 +91,23 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       float py = range * std::sin(heading);
       float vx = velocity * std::cos(heading);
       float vy = velocity * std::sin(heading);
+
+      // initilize
       ekf_.x_ << px, py, vx, vy;
-
-      previous_timestamp_ = measurement_pack.timestamp_;
     }
-    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      /**
-      Initialize state.
-      */
-      previous_timestamp_ = measurement_pack.timestamp_;
-      
-      if (true)
-      {
-        float px = measurement_pack.raw_measurements_[0];
-        float py = measurement_pack.raw_measurements_[1];
-        ekf_.x_ << px, py, 0, 0;
-      }
-      else
-      {
-        // ignore first laser, no velocity information
-        return;
-      }
-    }
+    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) 
+    {
+      cout << "First measurement is RADAR, set location, velocity set to zero " << endl;     
+      float px = measurement_pack.raw_measurements_[0];
+      float py = measurement_pack.raw_measurements_[1];
 
+      // initilize, speed unknown
+      ekf_.x_ << px, py, 0, 0;
+    }
     // done initializing, no need to predict or update
     is_initialized_ = true;
+    cout << "EKF Initialized " << endl;
+
     return;
   }
 
@@ -169,7 +162,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.R_ = R_radar_;
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     bool jacobian_empty = Hj_.isZero(0);
-    if (jacobian_empty) {
+    if (jacobian_empty) { // Jacobian (and Hessian) holds no information - no update
       return;
     }
 
@@ -184,6 +177,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   }
 
   // print the output
-  // cout << "x_ = " << ekf_.x_ << endl;
-  // cout << "P_ = " << ekf_.P_ << endl;
+
+  //cout << "x_ = " << ekf_.x_ << endl;
+  //cout << "P_ = " << ekf_.P_ << endl;
 }

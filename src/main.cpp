@@ -111,21 +111,25 @@ int main()
     	  fusionEKF.ProcessMeasurement(meas_package);   
 
         // backward/forward smoothing
-        for (vector<MeasurementPackage>::reverse_iterator m = measurements.rbegin(); m != measurements.rend(); ++m ) { 
-          fusionEKF.ProcessMeasurement(*m);
-        }
+        unsigned int const n_sweeps = 3;
+        unsigned int const history = 50;
+        for (unsigned int k = 0; k < n_sweeps; k++)
+        {
+          for (vector<MeasurementPackage>::reverse_iterator m = measurements.rbegin(); m != measurements.rend(); ++m ) { 
+            fusionEKF.ProcessMeasurement(*m);
+          }
 
-        int offset = 1;
-        if (measurements.size() > 200) {
-          measurements.erase(measurements.begin());
-          offset = 0;
-        }
+          unsigned int offset = 1;
+          if (measurements.size() > history) {
+            measurements.erase(measurements.begin());
+            offset = 0;
+          }
 
-        measurements.push_back(meas_package); 	  
-        for (vector<MeasurementPackage>::iterator m = measurements.begin() + offset; m != measurements.end(); ++m ) { 
-          fusionEKF.ProcessMeasurement(*m);   
+          measurements.push_back(meas_package); 	  
+          for (vector<MeasurementPackage>::iterator m = measurements.begin() + offset; m != measurements.end(); ++m ) { 
+            fusionEKF.ProcessMeasurement(*m);   
+          }
         }
-
 
     	  //Push the current estimated x,y positon from the Kalman filter's state vector
     	  VectorXd estimate(4);
@@ -154,6 +158,9 @@ int main()
           auto msg = "42[\"estimate_marker\"," + msgJson.dump() + "]";
           //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+	  
+          //std::ofstream o("rmse.json");
+          //o << std::setw(4) << msgJson << std::endl;
 	  
         }
       } else {
