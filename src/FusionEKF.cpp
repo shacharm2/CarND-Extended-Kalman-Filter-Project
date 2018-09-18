@@ -62,7 +62,8 @@ FusionEKF::~FusionEKF() {}
 
 void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
-
+  bool using_radar = true;
+  bool using_laser = true;  
   /*****************************************************************************
    *  Initialization
    ****************************************************************************/
@@ -78,7 +79,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.x_ = VectorXd(4);
     ekf_.Q_ = MatrixXd(4, 4);
     previous_timestamp_ = measurement_pack.timestamp_;
-    if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    if (using_radar && (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
       */
@@ -95,7 +96,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // initilize
       ekf_.x_ << px, py, vx, vy;
     }
-    else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) 
+    else if (using_laser && (measurement_pack.sensor_type_ == MeasurementPackage::LASER)) 
     {
       cout << "First measurement is RADAR, set location, velocity set to zero " << endl;     
       float px = measurement_pack.raw_measurements_[0];
@@ -110,6 +111,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     return;
   }
+
+  if (!using_radar && (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)) {
+    return;
+  }
+  else if (!using_laser && (measurement_pack.sensor_type_ == MeasurementPackage::LASER)) {
+    return;
+  }
+
 
   /*****************************************************************************
    *  Prediction
@@ -157,7 +166,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the state and covariance matrices.
    */
 
-  if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+  if (using_radar && (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)) 
+  {
     // Radar updates
     ekf_.R_ = R_radar_;
     Hj_ = tools.CalculateJacobian(ekf_.x_);
@@ -169,7 +179,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.H_ = Hj_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 
-  } else {
+  } 
+  else if (using_laser && (measurement_pack.sensor_type_ == MeasurementPackage::LASER))
+  {
     // Laser updates
     ekf_.R_ = R_laser_;
     ekf_.H_ = H_laser_;

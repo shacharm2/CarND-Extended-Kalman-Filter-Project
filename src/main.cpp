@@ -6,6 +6,7 @@
 #include "tools.h"
 
 using namespace std;
+//#define DEBUG          
 
 // for convenience
 using json = nlohmann::json;
@@ -110,9 +111,13 @@ int main()
         //Call ProcessMeasurment(meas_package) for Kalman filter
     	  fusionEKF.ProcessMeasurement(meas_package);   
 
+        
         // backward/forward smoothing
-        unsigned int const n_sweeps = 3;
         unsigned int const history = 50;
+        unsigned int const n_sweeps = 3;
+#ifdef DEBUG          
+        string json_file = "rmse_h100_i1.json";
+#endif
         for (unsigned int k = 0; k < n_sweeps; k++)
         {
           for (vector<MeasurementPackage>::reverse_iterator m = measurements.rbegin(); m != measurements.rend(); ++m ) { 
@@ -159,8 +164,10 @@ int main()
           //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
 	  
-          //std::ofstream o("rmse.json");
-          //o << std::setw(4) << msgJson << std::endl;
+#ifdef DEBUG          
+          std::ofstream o(json_file);
+          o << std::setw(4) << msgJson << std::endl;
+#endif          
 	  
         }
       } else {
