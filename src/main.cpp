@@ -110,7 +110,6 @@ int main()
           
         //Call ProcessMeasurment(meas_package) for Kalman filter
     	  fusionEKF.ProcessMeasurement(meas_package);   
-
         
         // backward/forward smoothing
         unsigned int const history = 50;

@@ -16,6 +16,32 @@ The backward-forward smoothing algorithm parameters are:
 1. History length (50 samples)
 2. Number of backward-forward sweeps (3 sweeps)
 
+The forward/backward design reuses the predict/update scheme, since there is no positive restriction on Δt. It does so by using a vector of samples history up to the size of 50 sampes:
+
+        // first update
+        fusionEKF.ProcessMeasurement(meas_package);   
+        
+        // backward/forward smoothing
+        unsigned int const history = 50;
+        unsigned int const n_sweeps = 3;
+        for (unsigned int k = 0; k < n_sweeps; k++)
+        {
+          for (vector<MeasurementPackage>::reverse_iterator m = measurements.rbegin(); m != measurements.rend(); ++m ) { 
+            fusionEKF.ProcessMeasurement(*m);
+          }
+
+          unsigned int offset = 1;
+          if (measurements.size() > history) {
+            measurements.erase(measurements.begin());
+            offset = 0;
+          }
+
+          measurements.push_back(meas_package); 	  
+          for (vector<MeasurementPackage>::iterator m = measurements.begin() + offset; m != measurements.end(); ++m ) { 
+            fusionEKF.ProcessMeasurement(*m);   
+          }
+        }
+
 # Results
 
 
