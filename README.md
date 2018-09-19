@@ -1,7 +1,7 @@
 # Backward-Forward Smoothing Extended Kalman
 Self-Driving Car Engineer Nanodegree Program
 
-This project utilizes a Backward-smoothing Extended Kalman Filter to estimate the state of a moving object of interest with noisy lidar and radar 
+This project utilizes a Backward-smoothing Extended Kalman Filter to estimate the state of a moving object of interest with noisy lidar and radar sensors.
 
 This project involves the Term 2 Simulator [here](https://github.com/udacity/self-driving-car-sim/releases)
 
