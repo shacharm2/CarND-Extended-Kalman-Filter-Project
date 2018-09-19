@@ -42,6 +42,7 @@ The workpoint has been selected after reviewing the RMSE for
 
 From the figure below, the workpoint of 50 samples and 3 sweeps has been selected, as substantial improvement in x, Vx & Vy RMSE (10%, 10% & 20% respectively), while y RMSE showed a small statistically insignificant improvement.
 
+![](./output_images/RMSEs_improvements.jpg)
 
 
 ## Evaluating Radar & Laser independently 
