@@ -113,4 +113,5 @@ OUTPUT: values provided by the c++ program to the simulator
 # References
 
 [1] [Smoothing Kalman Filter](http://jimbeck.caltech.edu/summerlectures/lectures/Kalman.pdf)
+
 [2] [Kalman smoothing](http://arl.cs.utah.edu/resources/Kalman%20Smoothing.pdf)
