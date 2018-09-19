@@ -79,6 +79,16 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     ekf_.x_ = VectorXd(4);
     ekf_.Q_ = MatrixXd(4, 4);
     previous_timestamp_ = measurement_pack.timestamp_;
+    if (using_radar && using_laser){ 
+      cout << "Using radar & laser" << endl;
+    }
+    else if (using_radar && !using_laser){ 
+      cout << "Using radar & not laser" << endl;
+    }
+    else if (!using_radar && using_laser){ 
+      cout << "Using laser & not radar" << endl;
+    }
+
     if (using_radar && (measurement_pack.sensor_type_ == MeasurementPackage::RADAR)) {
       /**
       Convert radar from polar to cartesian coordinates and initialize state.
@@ -98,7 +108,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     }
     else if (using_laser && (measurement_pack.sensor_type_ == MeasurementPackage::LASER)) 
     {
-      cout << "First measurement is RADAR, set location, velocity set to zero " << endl;     
+      cout << "First measurement is LASER, set location, velocity set to zero " << endl;     
       float px = measurement_pack.raw_measurements_[0];
       float py = measurement_pack.raw_measurements_[1];
 

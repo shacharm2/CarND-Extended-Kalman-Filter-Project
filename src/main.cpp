@@ -116,7 +116,7 @@ int main()
         unsigned int const history = 50;
         unsigned int const n_sweeps = 3;
 #ifdef DEBUG          
-        string json_file = "rmse_h100_i1.json";
+        string json_file = "LASER_OFF.json";
 #endif
         for (unsigned int k = 0; k < n_sweeps; k++)
         {
